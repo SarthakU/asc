@@ -1,0 +1,38 @@
+#!/usr/bin/env python3
+
+import shutil
+import os
+
+
+def copytree(src, dst, symlinks=False, ignore=None):
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            shutil.copytree(s, d, symlinks, ignore)
+        else:
+            shutil.copy2(s, d)
+
+home = os.path.expanduser("~")
+
+enigma_home = os.path.join(home, '.enigma')
+
+if not os.path.exists(enigma_home):
+    os.makedirs(enigma_home)
+    
+if not os.path.exists(os.path.join(enigma_home, 'scripts')):
+    os.makedirs(os.path.join(enigma_home, 'scripts'))
+    
+copytree('scripts', os.path.join(enigma_home, 'scripts'))    
+# shutil.copy('lang', enigma_home)
+shutil.copy('enigma', enigma_home)
+shutil.copy('setup', enigma_home)
+
+
+os.chmod(os.path.join(enigma_home, 'enigma'), 500)
+
+with open(os.path.join(home, '.bashrc'), 'a') as bash_profile:
+    bash_profile.write('export PATH=$PATH:' + enigma_home)
+
+
+

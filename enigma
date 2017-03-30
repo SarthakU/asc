@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+import sys
+from scripts import controllers
+import os
+
+dir_path = os.path.realpath(__file__)
+
+command = sys.argv[1]
+try:
+    file = sys.argv[2]
+except:
+    file = None
+home = os.path.expanduser("~")
+enigma_home = os.path.join(home, '.enigma')
+lang_path = os.path.join(enigma_home, 'lang')
+
+
+
+def select_language(file=None):
+    language = controllers.init_lang()
+    with open(lang_path, 'w') as lang:
+        lang.write(language)
+    return language
+
+try:
+    language = open(lang_path, 'r').read()
+except FileNotFoundError:
+    language = select_language()
+    
+
+def run(file):
+    controllers.run(language, file, '123')
+
+def submit(file):
+    controllers.submit(language, file, '123')
+commands = {'run': run,
+    'changelang': select_language,
+    'submit': submit, 
+    'cl': select_language
+}
+
+if command in commands.keys():
+    commands[command](file)
