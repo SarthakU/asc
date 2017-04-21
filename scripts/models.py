@@ -24,12 +24,12 @@ class Lang():
         stdout = process.communicate(input=str.encode(inp))[0]
         output = ''
         if process.returncode != 0:
-            print(colored(':( ', 'red'), end='')
+            print(colored('): ', 'red'), end='')
             print('Following error while running:\n')
             print(stdout.decode())
             sys.exit()
         else:
-            print(colored(':) ', 'green'), end='')
+            print(colored('(: ', 'green'), end='')
             print('Ran Successfully')
             try:
                 output = stdout.decode()
@@ -48,11 +48,11 @@ class Lang():
         return_code = process.wait()
         
         if return_code == 0:
-            print(colored(':) ', 'green'), end='')
+            print(colored('(: ', 'green'), end='')
             print('Compilation Sucesseful! I\'ll try run now.')
-            self.run(file_name, inp, java)
+            return self.run(file_name, inp, java)
         else:
-            print(colored(':( ', 'red'), end='')
+            print(colored('): ', 'red'), end='')
             print('Compilation Failed')
             sys.exit()
             # print(process.communicate()[0].decode())
@@ -84,11 +84,11 @@ class Lang():
         return_code = process.wait()
         
         if return_code == 0:
-            print(colored(':) ', 'green'), end='')
+            print(colored('(: ', 'green'), end='')
             print('Compilation Sucesseful! I\'ll try run now.')
             self.run_output(file_name, inp, java)
         else:
-            print(colored(':( ', 'red'), end='')
+            print(colored('): ', 'red'), end='')
             print('Compilation Failed')
             sys.exit()
             # print(process.communicate()[0].decode())

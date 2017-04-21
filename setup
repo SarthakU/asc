@@ -2,7 +2,11 @@
 
 import shutil
 import os
+from subprocess import Popen
+import getpass
+import requests
 
+termcolor = Popen(['sudo', 'easy_install3', 'termcolor'])
 
 def copytree(src, dst, symlinks=False, ignore=None):
     for item in os.listdir(src):
@@ -33,6 +37,23 @@ os.chmod(os.path.join(enigma_home, 'enigma'), 500)
 
 with open(os.path.join(home, '.bashrc'), 'a') as bash_profile:
     bash_profile.write('export PATH=$PATH:' + enigma_home)
+
+
+email = input("Email: ")
+password = getpass.getpass()
+
+
+headers = {'content-type' : 'application/json'}
+url = "https://code-sprint-web-sarthaku.c9users.io/api/auth"
+params = {'email': email, 'password': password}
+r = requests.post(url,params=params,headers=headers)
+
+email = r.json()['email']
+token = r.json()['authentication_token']
+
+
+with open('auth', 'w') as f:
+    f.write(email + '\n' + token)
 
 
 

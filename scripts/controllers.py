@@ -5,6 +5,7 @@ import sys
 from subprocess import Popen, PIPE, STDOUT, check_call
 from termcolor import colored
 from .models import Lang
+import getpass
 # os.chdir(os.path.dirname(__file__))
 
 c_build_commmand = lambda b: 'gcc ' + b + ' -o ' + b.split('.')[0]
@@ -30,18 +31,101 @@ compiled_langs = {
 
 
 
-def submit(lang, file=None, input=None):
-    lang = lang.replace(' ','').lower()
+import requests
 
-    if lang in interpreted_langs:
-        interpreted_langs[lang].run(file, 'asf')
-    elif lang in compiled_langs:
-        if lang == 'java':
-            compiled_langs[lang].compile(file, 'aaa', True)    
+def get_inputs(q_id):
+    headers = {'content-type' : 'application/json'}
+    url = "https://rocky-fjord-10871.herokuapp.com/api/auth"
+    # email = input("Email: ")
+    # password = getpass.getpass()
+    # params = {'email': email, 'password': password}
+    params = {'email': 'sarthak7u@gmail.com', 'password': '123456'}
+    r = requests.post(url,params=params,headers=headers)
+    # print(r.json())
+    
+
+    email = r.json()['email']
+    token = r.json()['authentication_token']
+    # print('avs')
+    params = {'user_email': email, 'user_token': token, 'q_id': q_id}
+    
+    
+    url = "https://rocky-fjord-10871.herokuapp.com/questions/get_input"
+    r = requests.get(url,params=params)
+    print(r.json()['inputs'])
+    return r.json()['inputs']
+
+def check_outputs(q_id, outputs, case_num):
+    headers = {'content-type' : 'application/json'}
+    url = "https://rocky-fjord-10871.herokuapp.com/api/auth"
+    # email = input("Email: ")
+    # password = getpass.getpass()
+    # params = {'email': email, 'password': password}
+    params = {'email': 'sarthak7u@gmail.com', 'password': '123456'}
+    r = requests.post(url,params=params,headers=headers)
+
+
+    email = r.json()['email']
+    token = r.json()['authentication_token']
+    
+    params = {'user_email': email, 'user_token': token, 'outputs': outputs.replace('\n', ','), 'q_id': q_id, 'case_num': case_num}
+    url = "https://rocky-fjord-10871.herokuapp.com/questions/check"
+    r = requests.post(url,params=params,headers=headers)
+    
+    # print(r.text)
+    if r.json()['inputs'] == 'Yay':
+        return True
+    else:
+        return r.json()['correct']
+
+def submit(lang, file=None, q_id=None):
+    
+    lang = lang.replace(' ','').lower()
+    case_num = 0
+
+    for i in get_inputs(q_id):
+        print('\nTEST CASE ' + str(case_num))
+        input_val = i.replace(',', '\n')
+        
+        if lang in interpreted_langs:
+            output = interpreted_langs[lang].run(file, input_val).strip()
+        elif lang in compiled_langs:
+            if lang == 'java':
+                output = compiled_langs[lang].compile(file, input_val, True).strip()    
+            else:
+                output = compiled_langs[lang].compile(file, input_val).strip()
+        else: 
+            output = {}
+            pass
+        
+        if check_outputs(q_id, output.replace('\n', ','), case_num) == True:
+            print(colored('(: ', 'green'), end='')
+            print(colored('Test Case Passed !\n'))
         else:
-            compiled_langs[lang].compile(file, 'aaa')    
-    else: 
-        pass
+            print(colored('): ', 'red'), end='')
+            print('Test Case Failed !\n')
+            print('I need this:')
+            print(check_outputs(q_id, output, case_num).replace(',', '\n'), end='\n\n')
+            print('I got this:')
+            print(output)
+            sys.exit()
+        case_num += 1
+    headers = {'content-type' : 'application/json'}
+    url = "https://rocky-fjord-10871.herokuapp.com/api/auth"
+    email = input("Email: ")
+    password = getpass.getpass()
+    params = {'email': email, 'password': password}
+    # params = {'email': 'sarthak7u@gmail.com', 'password': '123456'}
+    r = requests.post(url,params=params,headers=headers)
+
+
+    email = r.json()['email']
+    token = r.json()['authentication_token']
+    
+    params = {'user_email': email, 'user_token': token, 'q_id': q_id}
+    url = "https://rocky-fjord-10871.herokuapp.com/questions/submit"
+    r = requests.post(url,params=params,headers=headers)
+    
     
 def run(lang, file=None, input=None):
     lang = lang.replace(' ','').lower()
@@ -51,9 +135,9 @@ def run(lang, file=None, input=None):
         interpreted_langs[lang].run_output(file, 'asf')
     elif lang in compiled_langs:
         if lang == 'java':
-            compiled_langs[lang].compile(file, 'aaa', True)    
+            compiled_langs[lang].compile_output(file, 'aaa', True)    
         else:
-            compiled_langs[lang].compile(file, 'aaa')    
+            compiled_langs[lang].compile_output(file, 'aaa')    
     else: 
         pass
         

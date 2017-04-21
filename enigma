@@ -10,6 +10,12 @@ try:
     file = sys.argv[2]
 except:
     file = None
+
+try:
+    q_id = sys.argv[3]
+except:
+    q_id = None
+
 home = os.path.expanduser("~")
 enigma_home = os.path.join(home, '.enigma')
 lang_path = os.path.join(enigma_home, 'lang')
@@ -32,7 +38,7 @@ def run(file):
     controllers.run(language, file, '123')
 
 def submit(file):
-    controllers.submit(language, file, '123')
+    controllers.submit(language, file, q_id)
 commands = {'run': run,
     'changelang': select_language,
     'submit': submit, 
